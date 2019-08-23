@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 
 const PROJECT_NAME: &str = "ynab";
+const SPLIT_CATEGORY_ID: &str = "4f42d139-ded2-4782-b16e-e944868fbf62";
 
 pub fn api_key() -> std::path::PathBuf {
     directories::ProjectDirs::from("", "", PROJECT_NAME)
@@ -116,10 +117,11 @@ fn main() {
         if payee.deleted {
             continue;
         }
+        let name: &str = payee.name.as_ref();
         file.write_all(
             [
                 payee.id.as_ref(),
-                payee.name.as_ref(),
+                name.trim(),
                 payee
                     .transfer_account_id
                     .unwrap_or_else(|| "\\N".to_string())
@@ -160,6 +162,14 @@ fn main() {
                     .as_ref(),
                 transaction
                     .category_id
+                    .and_then(|id| {
+                        // XXX actually handle subtransactions
+                        if id == SPLIT_CATEGORY_ID {
+                            None
+                        } else {
+                            Some(id)
+                        }
+                    })
                     .unwrap_or_else(|| "\\N".to_string())
                     .as_ref(),
                 transaction
