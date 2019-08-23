@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS subtransactions;
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS payees;
 DROP TABLE IF EXISTS categories;
@@ -50,6 +51,16 @@ CREATE TABLE transactions (
     approved boolean NOT NULL,
     flag_color flag_color_t,
     account_id text REFERENCES accounts(id) NOT NULL,
+    payee_id text REFERENCES payees(id),
+    category_id text REFERENCES categories(id),
+    transfer_account_id text REFERENCES accounts(id)
+);
+
+CREATE TABLE subtransactions (
+    id text PRIMARY KEY,
+    transaction_id text REFERENCES transactions(id) NOT NULL,
+    amount bigint NOT NULL,
+    memo text,
     payee_id text REFERENCES payees(id),
     category_id text REFERENCES categories(id),
     transfer_account_id text REFERENCES accounts(id)

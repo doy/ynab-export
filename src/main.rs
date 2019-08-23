@@ -184,4 +184,39 @@ fn main() {
         file.write_all(b"\n").unwrap();
     }
     file.sync_all().unwrap();
+
+    let mut file = std::fs::File::create("subtransactions.tsv").unwrap();
+    for subtransaction in budget.subtransactions.unwrap() {
+        if subtransaction.deleted {
+            continue;
+        }
+        file.write_all(
+            [
+                subtransaction.id.as_ref(),
+                subtransaction.transaction_id.as_ref(),
+                format!("{}", subtransaction.amount).as_ref(),
+                subtransaction
+                    .memo
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+                subtransaction
+                    .payee_id
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+                subtransaction
+                    .category_id
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+                subtransaction
+                    .transfer_account_id
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+            ]
+            .join("\t")
+            .as_bytes(),
+        )
+        .unwrap();
+        file.write_all(b"\n").unwrap();
+    }
+    file.sync_all().unwrap();
 }

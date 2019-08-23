@@ -5,3 +5,4 @@ psql -U metabase metabase -c 'COPY category_groups FROM STDIN' < category_groups
 psql -U metabase metabase -c 'COPY categories FROM STDIN' < categories.tsv
 psql -U metabase metabase -c 'COPY payees FROM STDIN' < payees.tsv
 psql -U metabase metabase -c 'COPY transactions FROM STDIN' < transactions.tsv
+psql -U metabase metabase -c 'COPY subtransactions FROM STDIN' < subtransactions.tsv
