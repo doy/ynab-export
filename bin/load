@@ -13,6 +13,8 @@ psql -U metabase metabase < schema.sql
 psql -U metabase metabase -c 'COPY accounts FROM STDIN' < accounts.tsv
 psql -U metabase metabase -c 'COPY category_groups FROM STDIN' < category_groups.tsv
 psql -U metabase metabase -c 'COPY categories FROM STDIN' < categories.tsv
+psql -U metabase metabase -c 'COPY months FROM STDIN' < months.tsv
+psql -U metabase metabase -c 'COPY categories_by_month FROM STDIN' < categories_by_month.tsv
 psql -U metabase metabase -c 'COPY payees FROM STDIN' < payees.tsv
 psql -U metabase metabase -c 'COPY transactions FROM STDIN' < transactions.tsv
 psql -U metabase metabase -c 'COPY subtransactions FROM STDIN' < subtransactions.tsv
