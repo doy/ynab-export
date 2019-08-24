@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd "$(dirname "$0")/.." || exit 1
+
 cargo build
 cd data || exit 1
 
