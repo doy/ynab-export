@@ -219,4 +219,40 @@ fn main() {
         file.write_all(b"\n").unwrap();
     }
     file.sync_all().unwrap();
+
+    let mut file = std::fs::File::create("months.tsv").unwrap();
+    let mut file2 = std::fs::File::create("categories_by_month.tsv").unwrap();
+    for month in budget.months.unwrap() {
+        if month.deleted {
+            continue;
+        }
+        file.write_all([month.month.as_ref()].join("\t").as_bytes())
+            .unwrap();
+        file.write_all(b"\n").unwrap();
+
+        for category in month.categories {
+            if category.deleted {
+                continue;
+            }
+            file2
+                .write_all(
+                    [
+                        month.month.as_ref(),
+                        category.id.as_ref(),
+                        category.category_group_id.as_ref(),
+                        category.name.as_ref(),
+                        if category.hidden { "1" } else { "0" },
+                        &format!("{}", category.budgeted),
+                        &format!("{}", category.activity),
+                        &format!("{}", category.balance),
+                    ]
+                    .join("\t")
+                    .as_bytes(),
+                )
+                .unwrap();
+            file2.write_all(b"\n").unwrap();
+        }
+    }
+    file.sync_all().unwrap();
+    file2.sync_all().unwrap();
 }

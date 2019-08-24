@@ -1,6 +1,8 @@
 DROP TABLE IF EXISTS subtransactions;
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS payees;
+DROP TABLE IF EXISTS categories_by_month;
+DROP TABLE IF EXISTS months;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS category_groups;
 DROP TABLE IF EXISTS accounts;
@@ -31,6 +33,22 @@ CREATE TABLE categories (
     budgeted bigint NOT NULL,
     activity bigint NOT NULL,
     balance bigint NOT NULL
+);
+
+CREATE TABLE months (
+    month text PRIMARY KEY
+);
+
+CREATE TABLE categories_by_month (
+    month text REFERENCES months(month),
+    id text REFERENCES categories(id),
+    category_group_id text REFERENCES category_groups(id) NOT NULL,
+    name text NOT NULL,
+    hidden boolean NOT NULL,
+    budgeted bigint NOT NULL,
+    activity bigint NOT NULL,
+    balance bigint NOT NULL,
+    PRIMARY KEY (month, id)
 );
 
 CREATE TABLE payees (
