@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.." || exit 1
 cargo build
 cd data || exit 1
 
-rm -f ./*.tsv
+rm -f ./*.tsv || true
 ../target/debug/ynab-export
 
 psql -U metabase metabase < schema.sql
