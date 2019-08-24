@@ -1,5 +1,12 @@
 #!/bin/sh
 
+cargo build
+cd data || exit 1
+
+rm -f ./*.tsv
+../target/debug/ynab-export
+
+psql -U metabase metabase < schema.sql
 psql -U metabase metabase -c 'COPY accounts FROM STDIN' < accounts.tsv
 psql -U metabase metabase -c 'COPY category_groups FROM STDIN' < category_groups.tsv
 psql -U metabase metabase -c 'COPY categories FROM STDIN' < categories.tsv
