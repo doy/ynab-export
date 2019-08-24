@@ -36,11 +36,11 @@ CREATE TABLE categories (
 );
 
 CREATE TABLE months (
-    month text PRIMARY KEY
+    month date PRIMARY KEY
 );
 
 CREATE TABLE categories_by_month (
-    month text REFERENCES months(month),
+    month date REFERENCES months(month),
     id text REFERENCES categories(id),
     category_group_id text REFERENCES category_groups(id) NOT NULL,
     name text NOT NULL,
