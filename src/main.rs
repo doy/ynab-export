@@ -21,6 +21,7 @@ pub fn read_api_key() -> String {
     key.to_string()
 }
 
+#[allow(clippy::cognitive_complexity)]
 fn main() {
     let key = read_api_key();
     let mut ynab_config = ynab_api::apis::configuration::Configuration::new();
@@ -255,4 +256,78 @@ fn main() {
     }
     file.sync_all().unwrap();
     file2.sync_all().unwrap();
+
+    let mut file =
+        std::fs::File::create("scheduled_transactions.tsv").unwrap();
+    for scheduled_transaction in budget.scheduled_transactions.unwrap() {
+        if scheduled_transaction.deleted {
+            continue;
+        }
+        file.write_all(
+            [
+                scheduled_transaction.id.as_ref(),
+                scheduled_transaction.date_next.as_ref(),
+                scheduled_transaction.frequency.as_ref(),
+                format!("{}", scheduled_transaction.amount).as_ref(),
+                scheduled_transaction
+                    .memo
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+                scheduled_transaction.flag_color.as_ref(),
+                scheduled_transaction.account_id.as_ref(),
+                scheduled_transaction
+                    .payee_id
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+                if scheduled_transaction.category_id == SPLIT_CATEGORY_ID {
+                    "\\N"
+                } else {
+                    scheduled_transaction.category_id.as_ref()
+                },
+                scheduled_transaction
+                    .transfer_account_id
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+            ]
+            .join("\t")
+            .as_bytes(),
+        )
+        .unwrap();
+        file.write_all(b"\n").unwrap();
+    }
+    file.sync_all().unwrap();
+
+    let mut file =
+        std::fs::File::create("scheduled_subtransactions.tsv").unwrap();
+    for scheduled_subtransaction in budget.scheduled_subtransactions.unwrap()
+    {
+        if scheduled_subtransaction.deleted {
+            continue;
+        }
+        file.write_all(
+            [
+                scheduled_subtransaction.id.as_ref(),
+                scheduled_subtransaction.scheduled_transaction_id.as_ref(),
+                format!("{}", scheduled_subtransaction.amount).as_ref(),
+                scheduled_subtransaction
+                    .memo
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+                scheduled_subtransaction
+                    .payee_id
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+                scheduled_subtransaction.category_id.as_ref(),
+                scheduled_subtransaction
+                    .transfer_account_id
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
+            ]
+            .join("\t")
+            .as_bytes(),
+        )
+        .unwrap();
+        file.write_all(b"\n").unwrap();
+    }
+    file.sync_all().unwrap();
 }

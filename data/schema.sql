@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS scheduled_subtransactions;
+DROP TABLE IF EXISTS scheduled_transactions;
 DROP TABLE IF EXISTS subtransactions;
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS payees;
@@ -77,6 +79,44 @@ CREATE TABLE transactions (
 CREATE TABLE subtransactions (
     id text PRIMARY KEY,
     transaction_id text REFERENCES transactions(id) NOT NULL,
+    amount bigint NOT NULL,
+    memo text,
+    payee_id text REFERENCES payees(id),
+    category_id text REFERENCES categories(id),
+    transfer_account_id text REFERENCES accounts(id)
+);
+
+CREATE TYPE frequency_t AS ENUM (
+    'never',
+    'daily',
+    'weekly',
+    'everyOtherWeek',
+    'twiceAMonth',
+    'every4Weeks',
+    'monthly',
+    'everyOtherMonth',
+    'every3Months',
+    'every4Months',
+    'twiceAYear',
+    'yearly',
+    'everyOtherYear'
+);
+CREATE TABLE scheduled_transactions (
+    id text PRIMARY KEY,
+    date_next date NOT NULL,
+    frequency frequency_t NOT NULL,
+    amount bigint NOT NULL,
+    memo text,
+    flag_color flag_color_t,
+    account_id text REFERENCES accounts(id) NOT NULL,
+    payee_id text REFERENCES payees(id),
+    category_id text REFERENCES categories(id),
+    transfer_account_id text REFERENCES accounts(id)
+);
+
+CREATE TABLE scheduled_subtransactions (
+    id text PRIMARY KEY,
+    scheduled_transaction_id text REFERENCES scheduled_transactions(id) NOT NULL,
     amount bigint NOT NULL,
     memo text,
     payee_id text REFERENCES payees(id),
