@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS category_groups;
 DROP TABLE IF EXISTS accounts;
 DROP TYPE IF EXISTS cleared_t;
 DROP TYPE IF EXISTS flag_color_t;
+DROP TYPE IF EXISTS frequency_t;
 
 CREATE TABLE accounts (
     id text PRIMARY KEY,
