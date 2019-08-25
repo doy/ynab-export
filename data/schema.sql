@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS ints;
 DROP TABLE IF EXISTS scheduled_subtransactions;
 DROP TABLE IF EXISTS scheduled_transactions;
 DROP TABLE IF EXISTS subtransactions;
@@ -123,4 +124,8 @@ CREATE TABLE scheduled_subtransactions (
     payee_id text REFERENCES payees(id),
     category_id text REFERENCES categories(id),
     transfer_account_id text REFERENCES accounts(id)
+);
+
+CREATE TABLE ints (
+    i integer PRIMARY KEY
 );

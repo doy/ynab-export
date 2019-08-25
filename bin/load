@@ -20,3 +20,5 @@ psql -U metabase ynab -c 'COPY transactions FROM STDIN' < transactions.tsv
 psql -U metabase ynab -c 'COPY subtransactions FROM STDIN' < subtransactions.tsv
 psql -U metabase ynab -c 'COPY scheduled_transactions FROM STDIN' < scheduled_transactions.tsv
 psql -U metabase ynab -c 'COPY scheduled_subtransactions FROM STDIN' < scheduled_subtransactions.tsv
+
+seq 1000000 | psql -U metabase ynab -c 'COPY ints FROM STDIN'
