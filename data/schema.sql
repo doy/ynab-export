@@ -153,7 +153,7 @@ CREATE VIEW denorm_transactions AS (
             )
     )
     SELECT
-        id,
+        transactions_with_subtransactions.id,
         subtransaction_id,
         date,
         amount / 1000.0 as amount,
@@ -195,7 +195,7 @@ CREATE VIEW denorm_scheduled_transactions AS (
             scheduled_transactions.account_id,
             coalesce(scheduled_subtransactions.payee_id, scheduled_transactions.payee_id) AS payee_id,
             coalesce(scheduled_subtransactions.category_id, scheduled_transactions.category_id) AS category_id,
-            coalesce(scheduled_subtransactions.transfer_account_id, scheduled_transactions.transfer_account_id) AS transfer_account_id,
+            coalesce(scheduled_subtransactions.transfer_account_id, scheduled_transactions.transfer_account_id) AS transfer_account_id
         FROM
             scheduled_transactions LEFT JOIN scheduled_subtransactions ON (
                 scheduled_transactions.id = scheduled_subtransactions.scheduled_transaction_id
