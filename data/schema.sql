@@ -163,10 +163,15 @@ CREATE VIEW denorm_transactions AS (
         cleared,
         approved,
         flag_color,
+        account_id,
         accounts.name AS account,
+        payee_id,
         payees.name AS payee,
+        category_group_id,
         category_groups.name AS category_group,
+        category_id
         categories.name AS category,
+        transfer_account_id,
         transfer_accounts.name AS transfer_account
     FROM
         transactions_with_subtransactions LEFT JOIN accounts ON (
@@ -210,10 +215,15 @@ CREATE VIEW denorm_scheduled_transactions AS (
         amount / 1000.0 as amount,
         memo,
         flag_color,
+        account_id,
         accounts.name AS account,
+        payee_id,
         payees.name AS payee,
+        category_group_id,
         category_groups.name AS category_group,
+        category_id,
         categories.name AS category,
+        transfer_account_id,
         transfer_accounts.name AS transfer_account
     FROM
         scheduled_transactions_with_subtransactions LEFT JOIN accounts ON (
@@ -376,10 +386,15 @@ CREATE VIEW future_transactions AS (
             amount,
             memo,
             flag_color,
+            account_id,
             account,
+            payee_id,
             payee,
+            category_group_id,
             category_group,
+            category_id,
             category,
+            transfer_account_id,
             transfer_account
         FROM
             denorm_scheduled_transactions
@@ -403,10 +418,15 @@ CREATE VIEW future_transactions AS (
         amount,
         memo,
         flag_color,
+        account_id,
         account,
+        payee_id,
         payee,
+        category_group_id,
         category_group,
+        category_id,
         category,
+        transfer_account_id,
         transfer_account
     FROM
         repeated_transactions
