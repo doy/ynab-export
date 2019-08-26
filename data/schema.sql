@@ -380,7 +380,7 @@ CREATE VIEW future_transactions AS (
             payee,
             category_group,
             category,
-            transfer_account_id
+            transfer_account
         FROM
             denorm_scheduled_transactions
                 LEFT JOIN daily USING (frequency)
