@@ -1,3 +1,6 @@
+DROP VIEW IF EXISTS denorm_transactions;
+DROP VIEW IF EXISTS denorm_scheduled_transactions;
+DROP VIEW IF EXISTS future_transactions;
 DROP TABLE IF EXISTS ints;
 DROP TABLE IF EXISTS scheduled_subtransactions;
 DROP TABLE IF EXISTS scheduled_transactions;
@@ -130,7 +133,6 @@ CREATE TABLE ints (
     i integer PRIMARY KEY
 );
 
-DROP VIEW IF EXISTS denorm_transactions;
 CREATE VIEW denorm_transactions AS (
     WITH
     transactions_with_subtransactions AS (
@@ -180,7 +182,6 @@ CREATE VIEW denorm_transactions AS (
         )
 );
 
-DROP VIEW IF EXISTS denorm_scheduled_transactions;
 CREATE VIEW denorm_scheduled_transactions AS (
     WITH
     scheduled_transactions_with_subtransactions AS (
@@ -228,7 +229,6 @@ CREATE VIEW denorm_scheduled_transactions AS (
         )
 );
 
-DROP VIEW IF EXISTS future_transactions;
 CREATE VIEW future_transactions AS (
     WITH
     daily AS (
