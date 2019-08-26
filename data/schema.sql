@@ -204,7 +204,7 @@ CREATE VIEW denorm_scheduled_transactions AS (
     )
     SELECT
         scheduled_transactions_with_subtransactions.id,
-        subtransaction_id,
+        scheduled_subtransaction_id,
         date,
         frequency,
         amount / 1000.0 as amount,
