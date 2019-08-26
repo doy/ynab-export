@@ -414,7 +414,7 @@ CREATE VIEW future_transactions AS (
     SELECT
         id,
         scheduled_subtransaction_id,
-        date
+        date,
         amount,
         memo,
         flag_color,
