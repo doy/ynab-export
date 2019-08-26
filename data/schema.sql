@@ -169,7 +169,7 @@ CREATE VIEW denorm_transactions AS (
         payees.name AS payee,
         category_group_id,
         category_groups.name AS category_group,
-        category_id
+        category_id,
         categories.name AS category,
         transfer_account_id,
         transfer_accounts.name AS transfer_account
@@ -223,7 +223,7 @@ CREATE VIEW denorm_scheduled_transactions AS (
         category_groups.name AS category_group,
         category_id,
         categories.name AS category,
-        transfer_account_id,
+        scheduled_transactions_with_subtransactions.transfer_account_id,
         transfer_accounts.name AS transfer_account
     FROM
         scheduled_transactions_with_subtransactions LEFT JOIN accounts ON (
