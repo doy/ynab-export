@@ -171,7 +171,7 @@ CREATE VIEW denorm_transactions AS (
         category_groups.name AS category_group,
         category_id,
         categories.name AS category,
-        transfer_account_id,
+        transactions_with_subtransactions.transfer_account_id,
         transfer_accounts.name AS transfer_account
     FROM
         transactions_with_subtransactions LEFT JOIN accounts ON (
