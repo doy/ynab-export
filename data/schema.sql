@@ -1,6 +1,6 @@
-DROP VIEW IF EXISTS denorm_transactions;
-DROP VIEW IF EXISTS denorm_scheduled_transactions;
 DROP VIEW IF EXISTS future_transactions;
+DROP VIEW IF EXISTS denorm_scheduled_transactions;
+DROP VIEW IF EXISTS denorm_transactions;
 DROP TABLE IF EXISTS ints;
 DROP TABLE IF EXISTS scheduled_subtransactions;
 DROP TABLE IF EXISTS scheduled_transactions;
