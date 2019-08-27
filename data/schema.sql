@@ -383,6 +383,7 @@ CREATE VIEW future_transactions AS (
             ELSE
                 NULL
             END AS date,
+            frequency,
             amount,
             memo,
             flag_color,
@@ -415,6 +416,7 @@ CREATE VIEW future_transactions AS (
         id,
         scheduled_subtransaction_id,
         date,
+        frequency,
         amount,
         memo,
         flag_color,
