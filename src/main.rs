@@ -4,6 +4,8 @@ const PROJECT_NAME: &str = "ynab";
 // XXX is this fixed? or is it specific to my account?
 const SPLIT_CATEGORY_ID: &str = "4f42d139-ded2-4782-b16e-e944868fbf62";
 
+const SCHEMA: &str = include_str!("../data/schema.sql");
+
 pub fn api_key() -> std::path::PathBuf {
     directories::ProjectDirs::from("", "", PROJECT_NAME)
         .unwrap()
@@ -24,6 +26,11 @@ pub fn read_api_key() -> String {
 
 #[allow(clippy::cognitive_complexity)]
 fn main() {
+    if std::env::args().nth(1) == Some("schema".to_string()) {
+        print!("{}", SCHEMA);
+        std::process::exit(0);
+    }
+
     let key = read_api_key();
     let mut ynab_config = ynab_api::apis::configuration::Configuration::new();
     ynab_config.api_key = Some(ynab_api::apis::configuration::ApiKey {

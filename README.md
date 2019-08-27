@@ -6,8 +6,9 @@ file that can be used to represent this data.
 
 ## Example
 
+    ynab-export schema | psql ynab
+
     ynab-export
-    psql ynab < data/schema.sql
     psql ynab -c 'COPY accounts FROM STDIN' < accounts.tsv
     psql ynab -c 'COPY category_groups FROM STDIN' < category_groups.tsv
     psql ynab -c 'COPY categories FROM STDIN' < categories.tsv
