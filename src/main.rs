@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
 
 const PROJECT_NAME: &str = "ynab";
+// XXX is this fixed? or is it specific to my account?
 const SPLIT_CATEGORY_ID: &str = "4f42d139-ded2-4782-b16e-e944868fbf62";
 
 pub fn api_key() -> std::path::PathBuf {
@@ -164,7 +165,9 @@ fn main() {
                 transaction
                     .category_id
                     .and_then(|id| {
-                        // XXX actually handle subtransactions
+                        // the split category doesn't appear to be in the
+                        // categories data, so we have to exclude it or else
+                        // the NOT NULL constraint will fail
                         if id == SPLIT_CATEGORY_ID {
                             None
                         } else {
@@ -279,6 +282,9 @@ fn main() {
                     .payee_id
                     .unwrap_or_else(|| "\\N".to_string())
                     .as_ref(),
+                // the split category doesn't appear to be in the categories
+                // data, so we have to exclude it or else the NOT NULL
+                // constraint will fail
                 if scheduled_transaction.category_id == SPLIT_CATEGORY_ID {
                     "\\N"
                 } else {
