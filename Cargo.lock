@@ -1414,7 +1414,7 @@ dependencies = [
 
 [[package]]
 name = "ynab-export"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "directories 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ynab-api 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
