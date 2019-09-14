@@ -1,6 +1,6 @@
 [package]
 name = "ynab-export"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["Jesse Luehrs <doy@tozt.net>"]
 edition = "2018"
 description = "ynab-export is a tool to help export a YNAB budget to a database"
