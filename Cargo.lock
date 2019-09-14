@@ -1402,7 +1402,7 @@ dependencies = [
 
 [[package]]
 name = "ynab-api"
-version = "1.0.0"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "reqwest 0.9.20 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1417,7 +1417,7 @@ name = "ynab-export"
 version = "0.0.2"
 dependencies = [
  "directories 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "ynab-api 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ynab-api 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [metadata]
@@ -1582,4 +1582,4 @@ dependencies = [
 "checksum winapi-x86_64-pc-windows-gnu 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 "checksum winreg 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "b2986deb581c4fe11b621998a5e53361efe6b48a151178d0cd9eeffa4dc6acc9"
 "checksum ws2_32-sys 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d59cefebd0c892fa2dd6de581e937301d8552cb44489cdff035c6187cb63fa5e"
-"checksum ynab-api 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "004581d786952ee09c3a4f1e2a2319eb51d992cb35bc3d4d068e9a46a224053b"
+"checksum ynab-api 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e2249731e972372209fd0d41e1db5da32312164d01e710159411138c753c2ba8"

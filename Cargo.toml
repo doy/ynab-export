@@ -9,4 +9,4 @@ license = "MIT"
 
 [dependencies]
 directories = "2"
-ynab-api = "1"
+ynab-api = "2"

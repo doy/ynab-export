@@ -283,7 +283,10 @@ fn main() {
                     .memo
                     .unwrap_or_else(|| "\\N".to_string())
                     .as_ref(),
-                scheduled_transaction.flag_color.as_ref(),
+                scheduled_transaction
+                    .flag_color
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
                 scheduled_transaction.account_id.as_ref(),
                 scheduled_transaction
                     .payee_id
@@ -292,11 +295,16 @@ fn main() {
                 // the split category doesn't appear to be in the categories
                 // data, so we have to exclude it or else the NOT NULL
                 // constraint will fail
-                if scheduled_transaction.category_id == SPLIT_CATEGORY_ID {
-                    "\\N"
+                if scheduled_transaction.category_id
+                    == Some(SPLIT_CATEGORY_ID.to_string())
+                {
+                    "\\N".to_string()
                 } else {
-                    scheduled_transaction.category_id.as_ref()
-                },
+                    scheduled_transaction
+                        .category_id
+                        .unwrap_or_else(|| "\\N".to_string())
+                }
+                .as_ref(),
                 scheduled_transaction
                     .transfer_account_id
                     .unwrap_or_else(|| "\\N".to_string())
@@ -330,7 +338,10 @@ fn main() {
                     .payee_id
                     .unwrap_or_else(|| "\\N".to_string())
                     .as_ref(),
-                scheduled_subtransaction.category_id.as_ref(),
+                scheduled_subtransaction
+                    .category_id
+                    .unwrap_or_else(|| "\\N".to_string())
+                    .as_ref(),
                 scheduled_subtransaction
                     .transfer_account_id
                     .unwrap_or_else(|| "\\N".to_string())
