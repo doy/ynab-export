@@ -4,7 +4,8 @@ const PROJECT_NAME: &str = "ynab";
 // XXX is this fixed? or is it specific to my account?
 const SPLIT_CATEGORY_ID: &str = "4f42d139-ded2-4782-b16e-e944868fbf62";
 
-const SCHEMA: &str = include_str!("../data/schema.sql");
+const POSTGRES_SCHEMA: &str = include_str!("../data/postgres.sql");
+const SQLITE_SCHEMA: &str = include_str!("../data/sqlite.sql");
 
 pub fn api_key() -> std::path::PathBuf {
     directories::ProjectDirs::from("", "", PROJECT_NAME)
@@ -26,9 +27,20 @@ pub fn read_api_key() -> String {
 
 #[allow(clippy::cognitive_complexity)]
 fn main() {
-    if std::env::args().nth(1).as_deref() == Some("schema") {
-        print!("{}", SCHEMA);
-        std::process::exit(0);
+    match std::env::args().nth(1).as_deref() {
+        Some("postgres-schema") => {
+            print!("{}", POSTGRES_SCHEMA);
+            std::process::exit(0);
+        }
+        Some("sqlite3-schema") => {
+            print!("{}", SQLITE_SCHEMA);
+            std::process::exit(0);
+        }
+        Some(arg) => {
+            eprintln!("unknown argument {arg}");
+            std::process::exit(1);
+        }
+        None => {}
     }
 
     let rt = tokio::runtime::Builder::new_current_thread()
