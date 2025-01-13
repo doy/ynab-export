@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.6] - 2025-01-13
+
+### Added
+
+* added sqlite support
+
 ## [0.0.5] - 2025-01-13
 
 ### Changed
