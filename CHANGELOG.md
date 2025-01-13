@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.5] - 2025-01-13
+
+### Changed
+
+* bump ynab-api
+
 ## [0.0.4] - 2019-11-07
 
 ### Changed
