@@ -26,33 +26,37 @@ pub fn read_api_key() -> String {
 
 #[allow(clippy::cognitive_complexity)]
 fn main() {
-    if std::env::args().nth(1).as_ref().map(|s| s.as_str()) == Some("schema")
-    {
+    if std::env::args().nth(1).as_deref() == Some("schema") {
         print!("{}", SCHEMA);
         std::process::exit(0);
     }
 
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+
     let key = read_api_key();
     let mut ynab_config = ynab_api::apis::configuration::Configuration::new();
-    ynab_config.api_key = Some(ynab_api::apis::configuration::ApiKey {
-        prefix: Some("Bearer".to_string()),
-        key: key.to_string(),
-    });
-    let api = ynab_api::apis::client::APIClient::new(ynab_config);
-    let budget_id = api
-        .budgets_api()
-        .get_budgets()
+    ynab_config.bearer_access_token = Some(key.to_string());
+    let budget_id = rt
+        .block_on(ynab_api::apis::budgets_api::get_budgets(
+            &ynab_config,
+            None,
+        ))
         .unwrap()
         .data
         .budgets
-        .iter()
-        .next()
+        .first()
         .unwrap()
         .id
-        .clone();
-    let budget = api
-        .budgets_api()
-        .get_budget_by_id(&budget_id, None)
+        .to_string();
+    let budget = rt
+        .block_on(ynab_api::apis::budgets_api::get_budget_by_id(
+            &ynab_config,
+            &budget_id,
+            None,
+        ))
         .unwrap()
         .data
         .budget;
@@ -64,7 +68,7 @@ fn main() {
         }
         file.write_all(
             [
-                account.id.as_ref(),
+                account.id.to_string().as_ref(),
                 account.name.as_ref(),
                 if account.on_budget { "1" } else { "0" },
                 if account.closed { "1" } else { "0" },
@@ -87,7 +91,7 @@ fn main() {
         }
         file.write_all(
             [
-                category_group.id.as_ref(),
+                category_group.id.to_string().as_ref(),
                 category_group.name.as_ref(),
                 if category_group.hidden { "1" } else { "0" },
             ]
@@ -106,8 +110,8 @@ fn main() {
         }
         file.write_all(
             [
-                category.id.as_ref(),
-                category.category_group_id.as_ref(),
+                category.id.to_string().as_ref(),
+                category.category_group_id.to_string().as_ref(),
                 category.name.as_ref(),
                 if category.hidden { "1" } else { "0" },
                 &format!("{}", category.budgeted),
@@ -128,15 +132,16 @@ fn main() {
             continue;
         }
         let name: &str = payee.name.as_ref();
+        let transfer_account_id = payee
+            .transfer_account_id
+            .flatten()
+            .as_ref()
+            .map(|uuid| uuid.to_string());
         file.write_all(
             [
-                payee.id.as_ref(),
+                payee.id.to_string().as_ref(),
                 name.trim(),
-                payee
-                    .transfer_account_id
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
+                transfer_account_id.as_deref().unwrap_or("\\N"),
             ]
             .join("\t")
             .as_bytes(),
@@ -151,31 +156,34 @@ fn main() {
         if transaction.deleted {
             continue;
         }
+        let memo = transaction.memo.flatten();
+        let account_id = transaction.account_id.to_string();
+        let payee_id =
+            transaction.payee_id.flatten().map(|uuid| uuid.to_string());
+        let category_id = transaction
+            .category_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
+        let transfer_account_id = transaction
+            .transfer_account_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
         let parts: &[&str] = &[
             transaction.id.as_ref(),
             transaction.date.as_ref(),
             &format!("{}", transaction.amount),
-            transaction
-                .memo
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or("\\N"),
+            memo.as_deref().unwrap_or("\\N"),
             cleared_to_str(transaction.cleared),
             if transaction.approved { "1" } else { "0" },
             transaction
                 .flag_color
-                .map(t_flag_color_to_str)
+                .flatten()
+                .map(flag_color_to_str)
                 .unwrap_or("\\N"),
-            transaction.account_id.as_ref(),
-            transaction
-                .payee_id
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or("\\N"),
-            transaction
-                .category_id
-                .as_ref()
-                .map(|s| s.as_str())
+            account_id.as_ref(),
+            payee_id.as_deref().unwrap_or("\\N"),
+            category_id
+                .as_deref()
                 .and_then(|id| {
                     // the split category doesn't appear to be in the
                     // categories data, so we have to exclude it or else
@@ -187,11 +195,7 @@ fn main() {
                     }
                 })
                 .unwrap_or("\\N"),
-            transaction
-                .transfer_account_id
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or("\\N"),
+            transfer_account_id.as_deref().unwrap_or("\\N"),
         ];
         file.write_all(parts.join("\t").as_bytes()).unwrap();
         file.write_all(b"\n").unwrap();
@@ -203,31 +207,28 @@ fn main() {
         if subtransaction.deleted {
             continue;
         }
+        let memo = subtransaction.memo.flatten();
+        let payee_id = subtransaction
+            .payee_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
+        let category_id = subtransaction
+            .category_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
+        let transfer_account_id = subtransaction
+            .transfer_account_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
         file.write_all(
             [
                 subtransaction.id.as_ref(),
                 subtransaction.transaction_id.as_ref(),
                 format!("{}", subtransaction.amount).as_ref(),
-                subtransaction
-                    .memo
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
-                subtransaction
-                    .payee_id
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
-                subtransaction
-                    .category_id
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
-                subtransaction
-                    .transfer_account_id
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
+                memo.as_deref().unwrap_or("\\N"),
+                payee_id.as_deref().unwrap_or("\\N"),
+                category_id.as_deref().unwrap_or("\\N"),
+                transfer_account_id.as_deref().unwrap_or("\\N"),
             ]
             .join("\t")
             .as_bytes(),
@@ -255,8 +256,8 @@ fn main() {
                 .write_all(
                     [
                         month.month.as_ref(),
-                        category.id.as_ref(),
-                        category.category_group_id.as_ref(),
+                        category.id.to_string().as_ref(),
+                        category.category_group_id.to_string().as_ref(),
                         category.name.as_ref(),
                         if category.hidden { "1" } else { "0" },
                         &format!("{}", category.budgeted),
@@ -279,48 +280,43 @@ fn main() {
         if scheduled_transaction.deleted {
             continue;
         }
+        let id = scheduled_transaction.id.to_string();
+        let memo = scheduled_transaction.memo.flatten();
+        let account_id = scheduled_transaction.account_id.to_string();
+        let payee_id = scheduled_transaction
+            .payee_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
+        let category_id = scheduled_transaction
+            .category_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
+        let transfer_account_id = scheduled_transaction
+            .transfer_account_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
         let parts: &[&str] = &[
-            scheduled_transaction.id.as_ref(),
+            id.as_ref(),
             scheduled_transaction.date_next.as_ref(),
             frequency_to_str(scheduled_transaction.frequency),
             &format!("{}", scheduled_transaction.amount),
-            scheduled_transaction
-                .memo
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or("\\N"),
+            memo.as_deref().unwrap_or("\\N"),
             scheduled_transaction
                 .flag_color
-                .map(st_flag_color_to_str)
+                .flatten()
+                .map(flag_color_to_str)
                 .unwrap_or("\\N"),
-            scheduled_transaction.account_id.as_ref(),
-            scheduled_transaction
-                .payee_id
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or("\\N"),
+            account_id.as_ref(),
+            payee_id.as_deref().unwrap_or("\\N"),
             // the split category doesn't appear to be in the categories
             // data, so we have to exclude it or else the NOT NULL
             // constraint will fail
-            if scheduled_transaction
-                .category_id
-                .as_ref()
-                .map(|s| s.as_str())
-                == Some(SPLIT_CATEGORY_ID)
-            {
+            if category_id.as_deref() == Some(SPLIT_CATEGORY_ID) {
                 "\\N"
             } else {
-                scheduled_transaction
-                    .category_id
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N")
+                category_id.as_deref().unwrap_or("\\N")
             },
-            scheduled_transaction
-                .transfer_account_id
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or("\\N"),
+            transfer_account_id.as_deref().unwrap_or("\\N"),
         ];
         file.write_all(parts.join("\t").as_bytes()).unwrap();
         file.write_all(b"\n").unwrap();
@@ -334,31 +330,31 @@ fn main() {
         if scheduled_subtransaction.deleted {
             continue;
         }
+        let memo = scheduled_subtransaction.memo.flatten();
+        let payee_id = scheduled_subtransaction
+            .payee_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
+        let category_id = scheduled_subtransaction
+            .category_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
+        let transfer_account_id = scheduled_subtransaction
+            .transfer_account_id
+            .flatten()
+            .map(|uuid| uuid.to_string());
         file.write_all(
             [
-                scheduled_subtransaction.id.as_ref(),
-                scheduled_subtransaction.scheduled_transaction_id.as_ref(),
+                scheduled_subtransaction.id.to_string().as_ref(),
+                scheduled_subtransaction
+                    .scheduled_transaction_id
+                    .to_string()
+                    .as_ref(),
                 format!("{}", scheduled_subtransaction.amount).as_ref(),
-                scheduled_subtransaction
-                    .memo
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
-                scheduled_subtransaction
-                    .payee_id
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
-                scheduled_subtransaction
-                    .category_id
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
-                scheduled_subtransaction
-                    .transfer_account_id
-                    .as_ref()
-                    .map(|s| s.as_str())
-                    .unwrap_or("\\N"),
+                memo.as_deref().unwrap_or("\\N"),
+                payee_id.as_deref().unwrap_or("\\N"),
+                category_id.as_deref().unwrap_or("\\N"),
+                transfer_account_id.as_deref().unwrap_or("\\N"),
             ]
             .join("\t")
             .as_bytes(),
@@ -370,9 +366,9 @@ fn main() {
 }
 
 fn cleared_to_str(
-    cleared: ynab_api::models::transaction_summary::Cleared,
+    cleared: ynab_api::models::TransactionClearedStatus,
 ) -> &'static str {
-    use ynab_api::models::transaction_summary::Cleared::*;
+    use ynab_api::models::TransactionClearedStatus::*;
 
     match cleared {
         Cleared => "cleared",
@@ -381,25 +377,10 @@ fn cleared_to_str(
     }
 }
 
-fn t_flag_color_to_str(
-    flag_color: ynab_api::models::transaction_summary::FlagColor,
+fn flag_color_to_str(
+    flag_color: ynab_api::models::TransactionFlagColor,
 ) -> &'static str {
-    use ynab_api::models::transaction_summary::FlagColor::*;
-
-    match flag_color {
-        Red => "red",
-        Orange => "orange",
-        Yellow => "yellow",
-        Green => "green",
-        Blue => "blue",
-        Purple => "purple",
-    }
-}
-
-fn st_flag_color_to_str(
-    flag_color: ynab_api::models::scheduled_transaction_summary::FlagColor,
-) -> &'static str {
-    use ynab_api::models::scheduled_transaction_summary::FlagColor::*;
+    use ynab_api::models::TransactionFlagColor::*;
 
     match flag_color {
         Red => "red",

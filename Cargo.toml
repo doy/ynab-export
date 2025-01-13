@@ -8,5 +8,6 @@ repository = "https://git.tozt.net/ynab-export"
 license = "MIT"
 
 [dependencies]
-directories = "2"
-ynab-api = "3"
+directories = "6"
+tokio = { version = "1", features = ["full"] }
+ynab-api = "4"
